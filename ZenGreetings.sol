@@ -5,8 +5,9 @@ contract ZenGreetings {
     string public name;
     address public owner;
     uint256 public nameChangeCount; // Added line: counter for fun!
+    uint256 public lastChangeDate; // Added: timestamp of last name change
 
-    event NameChanged(string oldName, string newName, uint256 totalChanges);
+    event NameChanged(string oldName, string newName, uint256 totalChanges, uint256 changeTime);
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Only the owner can perform this action");
@@ -17,13 +18,15 @@ contract ZenGreetings {
         name = initialName;
         owner = msg.sender;
         nameChangeCount = 0; // Initialize counter
+        lastChangeDate = block.timestamp; // Initialize with contract creation time
     }
 
     function changeName(string memory newName) external onlyOwner {
         string memory oldName = name;
         name = newName;
         nameChangeCount += 1; // Increment counter
-        emit NameChanged(oldName, newName, nameChangeCount); // Updated event
+        lastChangeDate = block.timestamp; // Update timestamp
+        emit NameChanged(oldName, newName, nameChangeCount, lastChangeDate); // Updated event
     }
 
     function greet() external view returns (string memory) {
@@ -41,5 +44,9 @@ contract ZenGreetings {
         } else {
             return "Whoa! That's a lot of name changes!";
         }
+    }
+
+    function getLastChangeDate() external view returns (uint256) {
+        return lastChangeDate;
     }
 }
