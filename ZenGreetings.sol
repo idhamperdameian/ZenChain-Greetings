@@ -4,8 +4,9 @@ pragma solidity ^0.8.22;
 contract ZenGreetings {
     string public name;
     address public owner;
-    uint256 public nameChangeCount; // Added line: counter for fun!
+    uint256 public nameChangeCount; // Added: counter for fun!
     uint256 public lastChangeDate; // Added: timestamp of last name change
+    string[] public nameHistory; // Added: history of all names
 
     event NameChanged(string oldName, string newName, uint256 totalChanges, uint256 changeTime);
 
@@ -19,6 +20,7 @@ contract ZenGreetings {
         owner = msg.sender;
         nameChangeCount = 0; // Initialize counter
         lastChangeDate = block.timestamp; // Initialize with contract creation time
+        nameHistory.push(initialName); // Store the initial name in history
     }
 
     function changeName(string memory newName) external onlyOwner {
@@ -26,6 +28,8 @@ contract ZenGreetings {
         name = newName;
         nameChangeCount += 1; // Increment counter
         lastChangeDate = block.timestamp; // Update timestamp
+        nameHistory.push(newName); // Add to history
+
         emit NameChanged(oldName, newName, nameChangeCount, lastChangeDate); // Updated event
     }
 
@@ -48,5 +52,14 @@ contract ZenGreetings {
 
     function getLastChangeDate() external view returns (uint256) {
         return lastChangeDate;
+    }
+
+    function getNameHistoryLength() external view returns (uint256) {
+        return nameHistory.length;
+    }
+
+    function getNameAtIndex(uint256 index) external view returns (string memory) {
+        require(index < nameHistory.length, "Index out of bounds");
+        return nameHistory[index];
     }
 }
