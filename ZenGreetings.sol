@@ -8,6 +8,8 @@ contract ZenGreetings {
     uint256 public lastChangeDate; // Added: timestamp of last name change
     string[] public nameHistory; // Added: history of all names
 
+    mapping(address => string) public customGreeting; // New: Custom greetings per user
+
     event NameChanged(string oldName, string newName, uint256 totalChanges, uint256 changeTime);
 
     modifier onlyOwner() {
@@ -35,6 +37,20 @@ contract ZenGreetings {
 
     function greet() external view returns (string memory) {
         return string(abi.encodePacked("Hello, ", name, "!"));
+    }
+
+    // New: set your personal greeting message
+    function setCustomGreeting(string memory message) external {
+        customGreeting[msg.sender] = message;
+    }
+
+    // New: returns custom greeting if set, else default greeting
+    function getMyGreeting() external view returns (string memory) {
+        string memory message = customGreeting[msg.sender];
+        if (bytes(message).length == 0) {
+            return string(abi.encodePacked("Hello, ", name, "!")); // fallback
+        }
+        return string(abi.encodePacked(message, ", ", name, "!"));
     }
 
     // Get a cheerful comment on how often the name changed
