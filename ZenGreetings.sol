@@ -8,9 +8,13 @@ contract ZenGreetings {
     uint256 public lastChangeDate; // Added: timestamp of last name change
     string[] public nameHistory; // Added: history of all names
 
-    mapping(address => string) public customGreeting; // New: Custom greetings per user
+    mapping(address => string) public customGreeting; // Added: Custom greetings per user
+    mapping(address => bool) public hasLiked; // Added: tracks who liked
+    uint256 public totalLikes; // Added: total likes
 
     event NameChanged(string oldName, string newName, uint256 totalChanges, uint256 changeTime);
+    event GreetingLiked(address user);
+    event GreetingUnliked(address user);
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Only the owner can perform this action");
@@ -77,5 +81,23 @@ contract ZenGreetings {
     function getNameAtIndex(uint256 index) external view returns (string memory) {
         require(index < nameHistory.length, "Index out of bounds");
         return nameHistory[index];
+    }
+
+    // 💚 Like the greeting
+    function likeGreeting() external {
+        require(!hasLiked[msg.sender], "You already liked this greeting.");
+        hasLiked[msg.sender] = true;
+        totalLikes += 1;
+
+        emit GreetingLiked(msg.sender);
+    }
+
+    // 💔 Unlike the greeting
+    function unlikeGreeting() external {
+        require(hasLiked[msg.sender], "You haven't liked this greeting yet.");
+        hasLiked[msg.sender] = false;
+        totalLikes -= 1;
+
+        emit GreetingUnliked(msg.sender);
     }
 }
